@@ -1,73 +1,156 @@
-# Welcome to your Lovable project
 
-## Project info
+# Exodus - Plataforma de Automação Inteligente
 
-**URL**: https://lovable.dev/projects/bc85c7cd-f447-45d2-bc89-fddc76141ce9
+Uma plataforma SaaS completa para automação inteligente voltada para experts e infoprodutores, permitindo criar jornadas de onboarding com agentes de IA, acompanhar métricas de engajamento e gerenciar integrações.
 
-## How can I edit this code?
+## 🚀 Características
 
-There are several ways of editing your application.
+- **Dashboard Interativo**: Visão geral com métricas em tempo real
+- **Gestão de Jornadas**: Editor visual para criar sequências de automação
+- **CRM Integrado**: Gerenciamento completo de leads e clientes
+- **Sistema de Disparos**: Templates e mensagens automáticas
+- **Integrações**: Conectores para CRMs e APIs de terceiros
+- **Design Responsivo**: Interface adaptável para todos os dispositivos
+- **Modo Escuro/Claro**: Tema personalizável
+- **Animações Fluidas**: Experiência de usuário aprimorada
 
-**Use Lovable**
+## 🛠️ Tecnologias
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/bc85c7cd-f447-45d2-bc89-fddc76141ce9) and start prompting.
+- **Frontend**: React.js + TypeScript + Vite
+- **Styling**: TailwindCSS + Shadcn/UI
+- **Animações**: Framer Motion
+- **Estado**: Zustand
+- **Gráficos**: Recharts
+- **Ícones**: Lucide React
+- **Roteamento**: React Router DOM
 
-Changes made via Lovable will be committed automatically to this repo.
+## 📦 Instalação
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+1. Clone o repositório:
+```bash
 git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
 cd <YOUR_PROJECT_NAME>
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+2. Instale as dependências:
+```bash
+npm install
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. Inicie o servidor de desenvolvimento:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+4. Acesse a aplicação em `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🔐 Credenciais de Demo
 
-**Use GitHub Codespaces**
+Para acessar o sistema, use:
+- **Email**: admin@exodus.com
+- **Senha**: 123456
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 📁 Estrutura do Projeto
 
-## What technologies are used for this project?
+```
+src/
+├── components/          # Componentes reutilizáveis
+│   ├── layout/         # Layout principal (Sidebar, Header)
+│   └── ui/             # Componentes base do Shadcn/UI
+├── pages/              # Páginas da aplicação
+│   ├── auth/           # Autenticação (Login, etc.)
+│   ├── Dashboard.tsx   # Dashboard principal
+│   └── Journeys.tsx    # Gestão de jornadas
+├── stores/             # Estado global (Zustand)
+│   ├── authStore.ts    # Autenticação
+│   └── appStore.ts     # Configurações da app
+├── hooks/              # Hooks customizados
+├── lib/                # Utilitários
+└── App.tsx             # Componente raiz
+```
 
-This project is built with:
+## 🎯 Funcionalidades Implementadas
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### ✅ Autenticação
+- Tela de login com validação
+- Gerenciamento de estado de usuário
+- Proteção de rotas
 
-## How can I deploy this project?
+### ✅ Dashboard
+- Cards com métricas (KPIs)
+- Gráficos interativos (Line Chart, Bar Chart)
+- Performance das jornadas
+- Interface responsiva
 
-Simply open [Lovable](https://lovable.dev/projects/bc85c7cd-f447-45d2-bc89-fddc76141ce9) and click on Share -> Publish.
+### ✅ Gestão de Jornadas
+- Listagem de jornadas com filtros
+- Cards informativos com métricas
+- Estados (ativo, pausado, rascunho)
+- Ações rápidas (ativar, pausar, duplicar, excluir)
 
-## Can I connect a custom domain to my Lovable project?
+### ✅ Layout & UX
+- Sidebar colapsável com animações
+- Header com busca e menu de usuário
+- Modo escuro/claro
+- Animações fluidas com Framer Motion
+- Design system consistente
 
-Yes, you can!
+## 🔄 Próximos Passos
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### 📋 Páginas Pendentes
+- [ ] CRM e Leads (listagem, detalhes, segmentação)
+- [ ] Sistema de Disparos (templates, agendamento)
+- [ ] Central de Integrações (APIs, webhooks)
+- [ ] Configurações da Conta (perfil, faturamento)
+- [ ] Relatórios e Analytics
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+### 🛠️ Funcionalidades Futuras
+- [ ] Editor visual de jornadas (drag-and-drop)
+- [ ] Sistema de notificações em tempo real
+- [ ] Chat/Suporte integrado
+- [ ] Exportação de dados
+- [ ] API REST para integrações
+
+## 🚀 Deploy
+
+Para fazer o build de produção:
+
+```bash
+npm run build
+```
+
+Os arquivos serão gerados na pasta `dist/` e podem ser servidos por qualquer servidor estático.
+
+## 📚 Documentação
+
+### Estado Global (Zustand)
+
+- `authStore`: Gerencia autenticação e dados do usuário
+- `appStore`: Controla sidebar, tema e navegação
+
+### Componentes Principais
+
+- `Layout`: Wrapper principal com sidebar e header
+- `StatsCard`: Card de métricas reutilizável
+- `Sidebar`: Navegação lateral com animações
+- `Header`: Barra superior com busca e perfil
+
+### Estilização
+
+O projeto usa TailwindCSS com configurações customizadas:
+- Cores primárias baseadas em Indigo
+- Modo escuro completo
+- Animações personalizadas
+- Componentes do Shadcn/UI
+
+### Animações
+
+Framer Motion é usado para:
+- Transições de página
+- Hover effects em cards
+- Animações de entrada
+- Sidebar colapsável
+
+---
+
+**Desenvolvido com ❤️ para automatizar o sucesso dos experts digitais**
