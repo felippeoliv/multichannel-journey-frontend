@@ -222,16 +222,16 @@ export const JourneyEditor = () => {
               {stepTypes.map((stepType) => {
                 const IconComponent = stepType.icon;
                 return (
-                  <motion.button
+                  <motion.div
                     key={stepType.id}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => addStep(stepType.id)}
-                    className="w-full flex items-center space-x-3 p-3 bg-white dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    className="w-full flex items-center space-x-3 p-3 bg-white dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                     draggable
                     onDragStart={(e: React.DragEvent) => {
                       e.dataTransfer.setData('stepType', stepType.id);
                     }}
+                    onClick={() => addStep(stepType.id)}
                   >
                     <div className={`w-8 h-8 ${stepType.color} rounded-lg flex items-center justify-center`}>
                       <IconComponent className="w-4 h-4 text-white" />
@@ -242,7 +242,7 @@ export const JourneyEditor = () => {
                         {stepType.description}
                       </p>
                     </div>
-                  </motion.button>
+                  </motion.div>
                 );
               })}
             </div>
