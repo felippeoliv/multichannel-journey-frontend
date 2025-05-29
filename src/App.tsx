@@ -14,6 +14,7 @@ import { ContactsTable } from "./pages/ContactsTable";
 import { Messages } from "./pages/Messages";
 import { Integrations } from "./pages/Integrations";
 import { Reports } from "./pages/Reports";
+import { NpsAnalysis } from "./pages/NpsAnalysis";
 import { Settings } from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 

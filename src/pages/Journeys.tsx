@@ -12,7 +12,9 @@ import {
   Trash2,
   Users,
   MessageSquare,
-  TrendingUp,
+  Eye,
+  MousePointer,
+  Send,
 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -32,20 +34,26 @@ const journeysData = [
     name: 'Onboarding Iniciantes',
     description: 'Jornada para novos usuários da plataforma',
     status: 'ativo',
-    leads: 1247,
+    contatos: 1247,
     messages: 15,
-    conversion: 23.5,
+    entrega: 94.2,
+    leitura: 68.4,
+    cliques: 23.5,
+    engajamento: 31.8,
     createdAt: '2024-01-15',
     category: 'onboarding'
   },
   {
     id: 2,
     name: 'Follow-up Vendas',
-    description: 'Sequência para leads qualificados',
+    description: 'Sequência para contatos qualificados',
     status: 'ativo',
-    leads: 856,
+    contatos: 856,
     messages: 8,
-    conversion: 42.1,
+    entrega: 96.1,
+    leitura: 72.3,
+    cliques: 42.1,
+    engajamento: 45.2,
     createdAt: '2024-01-10',
     category: 'vendas'
   },
@@ -54,22 +62,28 @@ const journeysData = [
     name: 'Reativação de Clientes',
     description: 'Recuperar clientes inativos',
     status: 'pausado',
-    leads: 324,
+    contatos: 324,
     messages: 12,
-    conversion: 18.7,
+    entrega: 91.7,
+    leitura: 58.3,
+    cliques: 18.7,
+    engajamento: 28.4,
     createdAt: '2024-01-05',
     category: 'reativacao'
   },
   {
     id: 4,
-    name: 'Upsell Premium',
-    description: 'Conversão para plano premium',
+    name: 'Pesquisa de Satisfação',
+    description: 'Coleta de feedback e NPS',
     status: 'ativo',
-    leads: 167,
+    contatos: 167,
     messages: 6,
-    conversion: 31.2,
+    entrega: 97.3,
+    leitura: 81.2,
+    cliques: 56.1,
+    engajamento: 62.3,
     createdAt: '2024-01-20',
-    category: 'upsell'
+    category: 'pesquisa'
   },
 ];
 
@@ -219,9 +233,9 @@ export const Journeys = () => {
                     <div className="flex items-center justify-between text-sm">
                       <div className="flex items-center space-x-2">
                         <Users className="w-4 h-4 text-gray-400" />
-                        <span className="text-gray-600 dark:text-gray-400">Leads</span>
+                        <span className="text-gray-600 dark:text-gray-400">Contatos</span>
                       </div>
-                      <span className="font-medium">{journey.leads.toLocaleString()}</span>
+                      <span className="font-medium">{journey.contatos.toLocaleString()}</span>
                     </div>
                     
                     <div className="flex items-center justify-between text-sm">
@@ -234,10 +248,26 @@ export const Journeys = () => {
                     
                     <div className="flex items-center justify-between text-sm">
                       <div className="flex items-center space-x-2">
-                        <TrendingUp className="w-4 h-4 text-gray-400" />
-                        <span className="text-gray-600 dark:text-gray-400">Conversão</span>
+                        <Send className="w-4 h-4 text-blue-500" />
+                        <span className="text-gray-600 dark:text-gray-400">Entrega</span>
                       </div>
-                      <span className="font-medium text-green-600">{journey.conversion}%</span>
+                      <span className="font-medium text-blue-600">{journey.entrega}%</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center space-x-2">
+                        <Eye className="w-4 h-4 text-green-500" />
+                        <span className="text-gray-600 dark:text-gray-400">Leitura</span>
+                      </div>
+                      <span className="font-medium text-green-600">{journey.leitura}%</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center space-x-2">
+                        <MousePointer className="w-4 h-4 text-purple-500" />
+                        <span className="text-gray-600 dark:text-gray-400">Engajamento</span>
+                      </div>
+                      <span className="font-medium text-purple-600">{journey.engajamento}%</span>
                     </div>
                   </div>
                   

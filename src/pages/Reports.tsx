@@ -10,8 +10,9 @@ import {
   Calendar,
   Filter,
   Eye,
-  Mail,
-  Target,
+  Send,
+  MousePointer,
+  Heart,
 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -40,32 +41,32 @@ const statsData = [
     icon: MessageSquare,
   },
   {
-    title: 'Taxa de Abertura',
+    title: 'Taxa de Entrega',
+    value: '94.8%',
+    change: { value: 2.1, trend: 'up' as const },
+    icon: Send,
+  },
+  {
+    title: 'Taxa de Leitura',
     value: '68.4%',
-    change: { value: 3.1, trend: 'up' as const },
+    change: { value: 5.3, trend: 'up' as const },
     icon: Eye,
   },
   {
-    title: 'Novos Leads',
-    value: '1,247',
-    change: { value: 12.5, trend: 'up' as const },
-    icon: Users,
-  },
-  {
-    title: 'Taxa de Conversão',
-    value: '4.2%',
-    change: { value: 0.8, trend: 'down' as const },
-    icon: Target,
+    title: 'Engajamento Geral',
+    value: '32.7%',
+    change: { value: 3.8, trend: 'up' as const },
+    icon: MousePointer,
   },
 ];
 
 const monthlyData = [
-  { month: 'Jan', disparos: 4200, aberturas: 2800, cliques: 840, conversoes: 126 },
-  { month: 'Fev', disparos: 3800, aberturas: 2650, cliques: 760, conversoes: 114 },
-  { month: 'Mar', disparos: 5200, aberturas: 3640, cliques: 1040, conversoes: 156 },
-  { month: 'Abr', disparos: 4600, aberturas: 3220, cliques: 920, conversoes: 138 },
-  { month: 'Mai', disparos: 5800, aberturas: 4060, cliques: 1160, conversoes: 174 },
-  { month: 'Jun', disparos: 6200, aberturas: 4340, cliques: 1240, conversoes: 186 },
+  { month: 'Jan', disparos: 4200, entrega: 3948, leitura: 2800, cliques: 840, engajamento: 1260 },
+  { month: 'Fev', disparos: 3800, entrega: 3572, leitura: 2650, cliques: 760, engajamento: 1140 },
+  { month: 'Mar', disparos: 5200, entrega: 4888, leitura: 3640, cliques: 1040, engajamento: 1560 },
+  { month: 'Abr', disparos: 4600, entrega: 4324, leitura: 3220, cliques: 920, engajamento: 1380 },
+  { month: 'Mai', disparos: 5800, entrega: 5452, leitura: 4060, cliques: 1160, engajamento: 1740 },
+  { month: 'Jun', disparos: 6200, entrega: 5828, leitura: 4340, cliques: 1240, engajamento: 1860 },
 ];
 
 const channelData = [
@@ -77,33 +78,39 @@ const channelData = [
 
 const topJourneys = [
   {
-    name: 'Onboarding Iniciantes',
-    disparos: 2847,
-    conversoes: 284,
-    taxa: 9.98,
+    name: 'Pesquisa de Satisfação',
+    disparos: 567,
+    entrega: 97.3,
+    leitura: 81.2,
+    engajamento: 62.3,
   },
   {
     name: 'Follow-up Vendas',
     disparos: 1856,
-    conversoes: 247,
-    taxa: 13.31,
+    entrega: 96.1,
+    leitura: 72.3,
+    engajamento: 45.2,
+  },
+  {
+    name: 'Onboarding Iniciantes',
+    disparos: 2847,
+    entrega: 94.2,
+    leitura: 68.4,
+    engajamento: 31.8,
   },
   {
     name: 'Reativação Clientes',
     disparos: 924,
-    conversoes: 78,
-    taxa: 8.44,
-  },
-  {
-    name: 'Upsell Premium',
-    disparos: 567,
-    conversoes: 89,
-    taxa: 15.70,
+    entrega: 91.7,
+    leitura: 58.3,
+    engajamento: 28.4,
   },
 ];
 
 export const Reports = () => {
   const [dateRange, setDateRange] = useState('30days');
+  const [selectedJourney, setSelectedJourney] = useState('all');
+  const [selectedChannel, setSelectedChannel] = useState('all');
 
   return (
     <Layout>
@@ -116,10 +123,10 @@ export const Reports = () => {
         >
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Relatórios e Analytics
+              Relatórios de Engajamento
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Acompanhe o desempenho das suas campanhas
+              Acompanhe o desempenho e engajamento das suas campanhas
             </p>
           </div>
           <div className="flex items-center space-x-3 mt-4 sm:mt-0">
@@ -133,10 +140,27 @@ export const Reports = () => {
               <option value="90days">Últimos 90 dias</option>
               <option value="1year">Último ano</option>
             </select>
-            <Button variant="outline">
-              <Filter className="w-4 h-4 mr-2" />
-              Filtros
-            </Button>
+            <select
+              value={selectedJourney}
+              onChange={(e) => setSelectedJourney(e.target.value)}
+              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+            >
+              <option value="all">Todas as jornadas</option>
+              <option value="onboarding">Onboarding</option>
+              <option value="vendas">Vendas</option>
+              <option value="pesquisa">Pesquisa</option>
+              <option value="reativacao">Reativação</option>
+            </select>
+            <select
+              value={selectedChannel}
+              onChange={(e) => setSelectedChannel(e.target.value)}
+              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+            >
+              <option value="all">Todos os canais</option>
+              <option value="email">Email</option>
+              <option value="whatsapp">WhatsApp</option>
+              <option value="sms">SMS</option>
+            </select>
             <Button>
               <Download className="w-4 h-4 mr-2" />
               Exportar
@@ -165,7 +189,7 @@ export const Reports = () => {
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Line Chart - Performance ao longo do tempo */}
+          {/* Line Chart - Engajamento ao longo do tempo */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -175,7 +199,7 @@ export const Reports = () => {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <TrendingUp className="w-5 h-5" />
-                  <span>Performance Mensal</span>
+                  <span>Evolução do Engajamento</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -188,23 +212,30 @@ export const Reports = () => {
                     <Line
                       type="monotone"
                       dataKey="disparos"
-                      stroke="#3b82f6"
+                      stroke="#6b7280"
                       strokeWidth={2}
                       name="Disparos"
                     />
                     <Line
                       type="monotone"
-                      dataKey="aberturas"
-                      stroke="#10b981"
+                      dataKey="entrega"
+                      stroke="#3b82f6"
                       strokeWidth={2}
-                      name="Aberturas"
+                      name="Entrega"
                     />
                     <Line
                       type="monotone"
-                      dataKey="conversoes"
-                      stroke="#f59e0b"
+                      dataKey="leitura"
+                      stroke="#10b981"
                       strokeWidth={2}
-                      name="Conversões"
+                      name="Leitura"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="engajamento"
+                      stroke="#8b5cf6"
+                      strokeWidth={2}
+                      name="Engajamento"
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -257,8 +288,8 @@ export const Reports = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Target className="w-5 h-5" />
-                <span>Top Jornadas por Conversão</span>
+                <Heart className="w-5 h-5" />
+                <span>Jornadas com Melhor Engajamento</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -274,15 +305,16 @@ export const Reports = () => {
                       </h3>
                       <div className="flex items-center space-x-4 mt-1 text-sm text-gray-600 dark:text-gray-400">
                         <span>{journey.disparos.toLocaleString()} disparos</span>
-                        <span>{journey.conversoes} conversões</span>
+                        <span>Entrega: {journey.entrega}%</span>
+                        <span>Leitura: {journey.leitura}%</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-semibold text-green-600">
-                        {journey.taxa.toFixed(2)}%
+                      <div className="text-lg font-semibold text-purple-600">
+                        {journey.engajamento.toFixed(1)}%
                       </div>
                       <div className="text-xs text-gray-500">
-                        Taxa de conversão
+                        Taxa de engajamento
                       </div>
                     </div>
                   </div>
@@ -292,7 +324,7 @@ export const Reports = () => {
           </Card>
         </motion.div>
 
-        {/* Engagement Metrics */}
+        {/* Engagement Funnel */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -302,7 +334,7 @@ export const Reports = () => {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <BarChart3 className="w-5 h-5" />
-                <span>Métricas de Engajamento</span>
+                <span>Funil de Engajamento</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -312,8 +344,10 @@ export const Reports = () => {
                   <XAxis dataKey="month" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="cliques" fill="#6366f1" name="Cliques" />
-                  <Bar dataKey="conversoes" fill="#10b981" name="Conversões" />
+                  <Bar dataKey="entrega" fill="#3b82f6" name="Entrega" />
+                  <Bar dataKey="leitura" fill="#10b981" name="Leitura" />
+                  <Bar dataKey="cliques" fill="#f59e0b" name="Cliques" />
+                  <Bar dataKey="engajamento" fill="#8b5cf6" name="Engajamento" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
