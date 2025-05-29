@@ -29,7 +29,7 @@ const menuItems = [
     href: '/journeys',
   },
   {
-    title: 'Leads & CRM',
+    title: 'Contatos',
     icon: Users,
     href: '/leads',
   },
