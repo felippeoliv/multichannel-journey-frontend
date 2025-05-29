@@ -10,6 +10,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { Journeys } from "./pages/Journeys";
 import { JourneyEditor } from "./pages/JourneyEditor";
 import { Leads } from "./pages/Leads";
+import { ContactsTable } from "./pages/ContactsTable";
 import { Messages } from "./pages/Messages";
 import { Integrations } from "./pages/Integrations";
 import { Reports } from "./pages/Reports";
@@ -60,6 +61,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Leads />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/contacts-table"
+            element={
+              <ProtectedRoute>
+                <ContactsTable />
               </ProtectedRoute>
             }
           />

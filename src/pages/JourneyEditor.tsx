@@ -93,7 +93,6 @@ export const JourneyEditor = () => {
   const generateJourney = useCallback((prompt: string) => {
     console.log('Generating journey from prompt:', prompt);
     
-    // Simulated AI generation logic - in production, this would call an AI API
     const generatedSteps = [
       {
         id: Date.now().toString(),
@@ -230,7 +229,7 @@ export const JourneyEditor = () => {
                     onClick={() => addStep(stepType.id)}
                     className="w-full flex items-center space-x-3 p-3 bg-white dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                     draggable
-                    onDragStart={(e) => {
+                    onDragStart={(e: React.DragEvent) => {
                       e.dataTransfer.setData('stepType', stepType.id);
                     }}
                   >

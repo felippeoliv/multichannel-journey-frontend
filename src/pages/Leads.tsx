@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -129,10 +128,19 @@ export const Leads = () => {
               Gerencie seus contatos com sistema de tags flexível
             </p>
           </div>
-          <Button className="mt-4 sm:mt-0">
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Contato
-          </Button>
+          <div className="flex space-x-2 mt-4 sm:mt-0">
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.href = '/contacts-table'}
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              Ver Tabela Detalhada
+            </Button>
+            <Button className="mt-4 sm:mt-0">
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Contato
+            </Button>
+          </div>
         </motion.div>
 
         {/* Stats Cards */}
