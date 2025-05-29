@@ -222,10 +222,8 @@ export const JourneyEditor = () => {
               {stepTypes.map((stepType) => {
                 const IconComponent = stepType.icon;
                 return (
-                  <motion.div
+                  <div
                     key={stepType.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
                     className="w-full flex items-center space-x-3 p-3 bg-white dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                     draggable
                     onDragStart={(e: React.DragEvent) => {
@@ -242,7 +240,7 @@ export const JourneyEditor = () => {
                         {stepType.description}
                       </p>
                     </div>
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
