@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   Plus,
@@ -14,6 +14,7 @@ import {
   Settings,
   Trash2,
   Copy,
+  Wand2,
 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { GenerateJourneyModal } from '@/components/journey/GenerateJourneyModal';
+import { DragDropCanvas } from '@/components/journey/DragDropCanvas';
 
 const stepTypes = [
   {
@@ -85,7 +88,42 @@ export const JourneyEditor = () => {
   const [journeyDescription, setJourneyDescription] = useState('Jornada para novos usuários');
   const [steps, setSteps] = useState(initialSteps);
   const [selectedStep, setSelectedStep] = useState<string | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
+
+  const generateJourney = useCallback((prompt: string) => {
+    console.log('Generating journey from prompt:', prompt);
+    
+    // Simulated AI generation logic - in production, this would call an AI API
+    const generatedSteps = [
+      {
+        id: Date.now().toString(),
+        type: 'email',
+        title: 'Email de Boas-vindas',
+        content: 'Olá! Bem-vindo à nossa plataforma.',
+        delay: 0,
+        position: { x: 100, y: 150 },
+      },
+      {
+        id: (Date.now() + 1).toString(),
+        type: 'wait',
+        title: 'Aguardar 1 dia',
+        delay: 1,
+        position: { x: 300, y: 150 },
+      },
+      {
+        id: (Date.now() + 2).toString(),
+        type: 'whatsapp',
+        title: 'Mensagem de Acompanhamento',
+        content: 'Como está sendo sua experiência?',
+        delay: 0,
+        position: { x: 500, y: 150 },
+      },
+    ];
+
+    setSteps(generatedSteps);
+    setJourneyName(`Jornada: ${prompt.slice(0, 30)}...`);
+    setShowGenerateModal(false);
+  }, []);
 
   const getStepIcon = (type: string) => {
     const stepType = stepTypes.find(t => t.id === type);
@@ -150,6 +188,14 @@ export const JourneyEditor = () => {
           </div>
           
           <div className="flex items-center space-x-2">
+            <Button 
+              variant="outline"
+              onClick={() => setShowGenerateModal(true)}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none hover:from-purple-600 hover:to-pink-600"
+            >
+              <Wand2 className="w-4 h-4 mr-2" />
+              Gerar Jornada
+            </Button>
             <Button variant="outline">
               <Play className="w-4 h-4 mr-2" />
               Testar
@@ -183,6 +229,10 @@ export const JourneyEditor = () => {
                     whileTap={{ scale: 0.98 }}
                     onClick={() => addStep(stepType.id)}
                     className="w-full flex items-center space-x-3 p-3 bg-white dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData('stepType', stepType.id);
+                    }}
                   >
                     <div className={`w-8 h-8 ${stepType.color} rounded-lg flex items-center justify-center`}>
                       <IconComponent className="w-4 h-4 text-white" />
@@ -200,88 +250,17 @@ export const JourneyEditor = () => {
           </motion.div>
 
           {/* Canvas principal */}
-          <div className="flex-1 relative overflow-auto bg-gray-100 dark:bg-gray-950">
-            <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-            
-            {/* Steps */}
-            {steps.map((step, index) => {
-              const IconComponent = getStepIcon(step.type);
-              const isSelected = selectedStep === step.id;
-              
-              return (
-                <motion.div
-                  key={step.id}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  style={{
-                    position: 'absolute',
-                    left: step.position.x,
-                    top: step.position.y,
-                  }}
-                  className={`w-64 cursor-pointer ${
-                    isSelected ? 'ring-2 ring-primary-500' : ''
-                  }`}
-                  onClick={() => setSelectedStep(step.id)}
-                >
-                  <Card className="shadow-lg">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <div className={`w-6 h-6 ${getStepColor(step.type)} rounded flex items-center justify-center`}>
-                            <IconComponent className="w-3 h-3 text-white" />
-                          </div>
-                          <span className="font-medium text-sm">{step.title}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="w-6 h-6 p-0"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // Duplicar step
-                            }}
-                          >
-                            <Copy className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="w-6 h-6 p-0 text-red-600"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteStep(step.id);
-                            }}
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      {step.content && (
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-                          {step.content.slice(0, 50)}...
-                        </p>
-                      )}
-                      {step.delay > 0 && (
-                        <Badge variant="outline" className="text-xs">
-                          {step.delay} dias
-                        </Badge>
-                      )}
-                    </CardContent>
-                  </Card>
-                  
-                  {/* Seta para próximo step */}
-                  {index < steps.length - 1 && (
-                    <div className="absolute top-1/2 -right-8 transform -translate-y-1/2">
-                      <ArrowRight className="w-6 h-6 text-gray-400" />
-                    </div>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
+          <DragDropCanvas
+            steps={steps}
+            selectedStep={selectedStep}
+            onSelectStep={setSelectedStep}
+            onUpdateStep={updateStep}
+            onDeleteStep={deleteStep}
+            onAddStep={addStep}
+            getStepIcon={getStepIcon}
+            getStepColor={getStepColor}
+            stepTypes={stepTypes}
+          />
 
           {/* Painel de propriedades */}
           {selectedStepData && (
@@ -354,6 +333,12 @@ export const JourneyEditor = () => {
             </motion.div>
           )}
         </div>
+
+        <GenerateJourneyModal
+          isOpen={showGenerateModal}
+          onClose={() => setShowGenerateModal(false)}
+          onGenerate={generateJourney}
+        />
       </div>
     </Layout>
   );
