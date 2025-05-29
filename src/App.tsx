@@ -8,6 +8,12 @@ import { useAuthStore } from "./stores/authStore";
 import { Login } from "./pages/auth/Login";
 import { Dashboard } from "./pages/Dashboard";
 import { Journeys } from "./pages/Journeys";
+import { JourneyEditor } from "./pages/JourneyEditor";
+import { Leads } from "./pages/Leads";
+import { Messages } from "./pages/Messages";
+import { Integrations } from "./pages/Integrations";
+import { Reports } from "./pages/Reports";
+import { Settings } from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +44,62 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Journeys />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/journeys/editor/:id?"
+            element={
+              <ProtectedRoute>
+                <JourneyEditor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/leads"
+            element={
+              <ProtectedRoute>
+                <Leads />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <Messages />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/integrations"
+            element={
+              <ProtectedRoute>
+                <Integrations />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reports"
+            element={
+              <ProtectedRoute>
+                <Reports />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Settings />
               </ProtectedRoute>
             }
           />

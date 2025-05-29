@@ -132,17 +132,20 @@ export const Sidebar = () => {
             exit={{ opacity: 0 }}
             className="p-4 border-t border-gray-200 dark:border-gray-700"
           >
-            <button className="w-full flex items-center space-x-3 px-3 py-3 rounded-lg bg-primary-500 text-white hover:bg-primary-600 transition-colors">
+            <NavLink 
+              to="/journeys/editor"
+              className="w-full flex items-center space-x-3 px-3 py-3 rounded-lg bg-primary-500 text-white hover:bg-primary-600 transition-colors"
+            >
               <PlusCircle className="w-5 h-5" />
               <span className="font-medium">Nova Jornada</span>
-            </button>
+            </NavLink>
           </motion.div>
         )}
 
         {/* User Profile */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
           <NavLink
-            to="/profile"
+            to="/settings"
             className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
             <User className="w-5 h-5 flex-shrink-0" />
