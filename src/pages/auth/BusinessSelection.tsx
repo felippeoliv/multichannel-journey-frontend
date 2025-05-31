@@ -1,21 +1,63 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
+import { supabase } from '@/lib/supabase'
+
+interface Business {
+  id: string
+  name: string
+  email: string
+  phone: string
+  description: string
+  created_at: string
+}
+
+interface BusinessWithRole extends Business {
+  role: string
+}
 
 export default function BusinessSelection() {
   const { user, loading, selectBusiness } = useAuth()
   const navigate = useNavigate()
+  const [businesses, setBusinesses] = useState<BusinessWithRole[]>([])
+  const [loadingBusinesses, setLoadingBusinesses] = useState(true)
 
   useEffect(() => {
     if (!user) {
       navigate('/auth/login')
-    } else if (user.selectedBusinessId) {
-      navigate('/dashboard')
+    } else {
+      fetchUserBusinesses()
     }
   }, [user, navigate])
+
+  const fetchUserBusinesses = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('business_users')
+        .select(`
+          role,
+          business:businesses(*)
+        `)
+        .eq('user_id', user?.id)
+
+      if (error) throw error
+
+      const formattedBusinesses = data.map(item => ({
+        ...item.business,
+        role: item.role
+      }))
+
+      setBusinesses(formattedBusinesses)
+    } catch (error) {
+      console.error('Error fetching businesses:', error)
+      toast.error('Failed to load businesses')
+    } finally {
+      setLoadingBusinesses(false)
+    }
+  }
 
   const handleBusinessSelect = async (businessId: string) => {
     try {
@@ -26,7 +68,7 @@ export default function BusinessSelection() {
     }
   }
 
-  if (loading) {
+  if (loading || loadingBusinesses) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -34,7 +76,7 @@ export default function BusinessSelection() {
     )
   }
 
-  if (!user?.businesses?.length) {
+  if (!businesses.length) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <Card className="w-[400px]">
@@ -64,14 +106,17 @@ export default function BusinessSelection() {
           <CardDescription>Choose which business you want to access</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {user.businesses.map((business) => (
+          {businesses.map((business) => (
             <Button
               key={business.id}
               variant="outline"
               className="w-full justify-start"
               onClick={() => handleBusinessSelect(business.id)}
             >
-              {business.name}
+              <div className="flex flex-col items-start">
+                <span>{business.name}</span>
+                <span className="text-xs text-gray-500 capitalize">Role: {business.role}</span>
+              </div>
             </Button>
           ))}
         </CardContent>

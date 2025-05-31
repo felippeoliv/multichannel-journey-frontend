@@ -1,20 +1,21 @@
-import { createContext, useContext, useEffect, useState, useRef } from 'react'
-import { AuthError, Session, User as SupabaseUser } from '@supabase/supabase-js'
-import { supabase } from '../lib/supabase'
-import type { User } from '../lib/supabase'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { Session, User as SupabaseUser } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase'
+import { authService, SignUpData } from '@/services/auth.service'
+import { businessService } from '@/services/business.service'
 
 interface Business {
   id: string
   name: string
-  plan: 'free' | 'pro' | 'enterprise'
-  settings: {
-    allowedChannels: string[]
-    maxUsers: number
-    features: string[]
-  }
+  email: string
+  phone: string
+  description: string
+  created_at: string
 }
 
-interface UserWithBusinesses extends User {
+interface User extends SupabaseUser {
+  name?: string
+  role?: string
   businesses: Business[]
   selectedBusinessId: string | null
   emailVerified: boolean
@@ -23,7 +24,7 @@ interface UserWithBusinesses extends User {
 
 interface AuthContextType {
   session: Session | null
-  user: UserWithBusinesses | null
+  user: User | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string, name: string, businessId?: string) => Promise<void>
@@ -38,103 +39,83 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+function useAuth() {
+  const context = useContext(AuthContext)
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider')
+  }
+  return context
+}
+
+function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
-  const [user, setUser] = useState<UserWithBusinesses | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
-  const initialized = useRef(false)
 
   useEffect(() => {
-    if (initialized.current) {
-      console.log('AuthProvider: Already initialized, skipping...')
-      return
-    }
-
-    console.log('AuthProvider: Initializing...')
-    initialized.current = true
-    
-    // Get initial session
+    // Check active sessions and sets the user
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('AuthProvider: Initial session:', session)
       setSession(session)
       if (session?.user) {
         fetchUser(session.user)
       } else {
-        console.log('AuthProvider: No session found, setting loading to false')
         setLoading(false)
       }
-    }).catch(error => {
-      console.error('AuthProvider: Error getting initial session:', error)
-      setError(error)
-      setLoading(false)
     })
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log('AuthProvider: Auth state changed:', _event, session)
+    // Listen for changes on auth state
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
       if (session?.user) {
-        await fetchUser(session.user)
-        if (!user) {
-          console.error('AuthProvider: fetchUser completed but user state is still null.');
-        }
+        fetchUser(session.user)
       } else {
-        console.log('AuthProvider: No user in session, clearing user state')
         setUser(null)
         setLoading(false)
       }
     })
 
-    return () => {
-      console.log('AuthProvider: Cleaning up...')
-      subscription.unsubscribe()
-      initialized.current = false
-    }
+    return () => subscription.unsubscribe()
   }, [])
 
   async function fetchUser(supabaseUser: SupabaseUser) {
     console.log('AuthProvider: Fetching user data for:', supabaseUser.id)
     try {
-      // Primeiro, buscar os dados básicos do usuário
+      console.log('AuthProvider: Fetching businesses for user')
+      const businesses = await businessService.getUserBusinesses(supabaseUser.id)
+      console.log('AuthProvider: Fetched businesses:', businesses)
+      
+      // Get user profile data
+      console.log('AuthProvider: Fetching user profile data')
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('*, businesses(*)') // Fetch user and associated businesses in one query
+        .select('name')
         .eq('id', supabaseUser.id)
-        .maybeSingle() // Use maybeSingle instead of single
+        .maybeSingle()
 
       if (userError) {
-        console.error('AuthProvider: Error fetching user:', userError)
-        setError(userError)
-        setUser(null) // Explicitly set user to null on error
-        setLoading(false)
-        return
+        console.error('AuthProvider: Error fetching user profile:', userError)
+        throw userError
       }
-
-      console.log('AuthProvider: User data fetched:', userData)
-
-      if (userData) {
-        // Handle case where user exists but has no associated businesses
-        const userBusinesses = userData?.businesses || [];
-
-        setUser({
-          ...userData,
-          businesses: userBusinesses,
-          selectedBusinessId: userBusinesses.length > 0 ? userBusinesses[0].id : null, // Select the first business if available
-          emailVerified: supabaseUser.email_confirmed_at !== null,
-          lastLoginAt: new Date().toISOString()
-        })
-      } else {
-        console.log('AuthProvider: User data not found in "users" table for id:', supabaseUser.id);
-        setUser(null);
+      
+      console.log('AuthProvider: User profile data:', userData)
+      
+      const userWithBusinesses: User = {
+        ...supabaseUser,
+        ...userData,
+        businesses,
+        selectedBusinessId: businesses.length > 0 ? businesses[0].id : null,
+        emailVerified: supabaseUser.email_confirmed_at !== null,
+        lastLoginAt: new Date().toISOString()
       }
+      
+      console.log('AuthProvider: Setting user with businesses:', userWithBusinesses)
+      setUser(userWithBusinesses)
       setLoading(false)
     } catch (error) {
-      console.error('AuthProvider: Unexpected error fetching user:', error)
+      console.error('AuthProvider: Error fetching user:', error)
       setError(error as Error)
-      setUser(null) // Explicitly set user to null on error
+      setUser(null)
       setLoading(false)
     }
   }
@@ -144,22 +125,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true)
     setError(null)
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-      if (error) {
-        console.error('AuthProvider: Sign in error:', error)
-        setError(error)
-        setLoading(false)
-        throw error
-      }
+      await authService.signIn(email, password)
       console.log('AuthProvider: Sign in successful')
     } catch (error) {
-      console.error('AuthProvider: Unexpected sign in error:', error)
+      console.error('AuthProvider: Sign in error:', error)
       setError(error as Error)
-      setLoading(false)
       throw error
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -167,58 +140,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true)
     setError(null)
     try {
-      // First create the auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
+      await authService.signUp({ 
+        email, 
+        password, 
+        name,
+        businessId 
       })
-
-      console.log('AuthProvider: Supabase Auth signUp result:', { authData, authError });
-
-      if (authError) {
-        setError(authError)
-        throw authError
-      }
-
-      if (!authData.user) {
-        throw new Error('No user data returned from signup')
-      }
-
-      // Then create the user profile with business association
-      const { error: profileError } = await supabase
-        .from('users')
-        .insert({
-          id: authData.user.id,
-          email,
-          name,
-          role: 'admin', // First user is always admin
-          business_id: businessId,
-          is_agent: false,
-        })
-
-      if (profileError) {
-        setError(profileError)
-        throw profileError
-      }
-
-      // If businessId is provided, create the user-business association
-      if (businessId) {
-        const { error: businessError } = await supabase
-          .from('user_businesses')
-          .insert({
-            user_id: authData.user.id,
-            business_id: businessId,
-            role: 'admin'
-          })
-
-        if (businessError) {
-          setError(businessError)
-          throw businessError
-        }
-      }
-
-      // Fetch the complete user data
-      await fetchUser(authData.user)
     } catch (error) {
       setError(error as Error)
       throw error
@@ -232,20 +159,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true)
     setError(null)
     try {
-      const { error } = await supabase.auth.signOut()
-      if (error) {
-        console.error('AuthProvider: Sign out error:', error)
-        setError(error)
-        setLoading(false)
-        throw error
-      }
+      await authService.signOut()
       console.log('AuthProvider: Sign out successful')
-      setLoading(false)
     } catch (error) {
-      console.error('AuthProvider: Unexpected sign out error:', error)
+      console.error('AuthProvider: Sign out error:', error)
       setError(error as Error)
-      setLoading(false)
       throw error
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -256,31 +177,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true)
     setError(null)
     try {
-      // Verificar se o usuário tem acesso ao negócio
-      const { data, error } = await supabase
-        .from('user_businesses')
-        .select('*')
+      const business = await businessService.getBusinessById(businessId)
+      if (!business) {
+        throw new Error('Business not found')
+      }
+
+      // Get user role for this business
+      const { data: businessUser, error: businessUserError } = await supabase
+        .from('business_users')
+        .select('role')
         .eq('user_id', user.id)
         .eq('business_id', businessId)
         .single()
 
-      if (error || !data) {
-        console.error('AuthProvider: User does not have access to this business')
-        setError(error || new Error('User does not have access to this business'))
-        setLoading(false)
-        throw new Error('User does not have access to this business')
-      }
+      if (businessUserError) throw businessUserError
 
       setUser({
         ...user,
-        selectedBusinessId: businessId
+        selectedBusinessId: businessId,
+        role: businessUser.role
       })
-      setLoading(false)
     } catch (error) {
       console.error('AuthProvider: Error selecting business:', error)
       setError(error as Error)
-      setLoading(false)
       throw error
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -288,13 +210,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true)
     setError(null)
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
-      })
-      if (error) {
-        setError(error)
-        throw error
-      }
+      await authService.resetPassword(email)
     } catch (error) {
       setError(error as Error)
       throw error
@@ -307,13 +223,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true)
     setError(null)
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword
-      })
-      if (error) {
-        setError(error)
-        throw error
-      }
+      await authService.updatePassword(newPassword)
     } catch (error) {
       setError(error as Error)
       throw error
@@ -327,14 +237,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true)
     setError(null)
     try {
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: user.email,
-      })
-      if (error) {
-        setError(error)
-        throw error
-      }
+      await authService.resendVerificationEmail(user.email)
     } catch (error) {
       setError(error as Error)
       throw error
@@ -356,10 +259,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         })
         .eq('id', user.id)
       
-      if (error) {
-        setError(error)
-        throw error
-      }
+      if (error) throw error
 
       setUser({
         ...user,
@@ -372,8 +272,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false)
     }
   }
-
-  console.log('AuthProvider: Current state:', { session, user, loading, error })
 
   return (
     <AuthContext.Provider
@@ -397,10 +295,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
-export const useAuth = () => {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
-} 
+export { useAuth, AuthProvider } 

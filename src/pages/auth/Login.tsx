@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
+import { supabase } from '@/lib/supabase'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -15,10 +16,27 @@ export default function LoginPage() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    console.log('LoginPage useEffect: user', user);
     if (user) {
-      console.log('LoginPage useEffect: Navigating to /dashboard');
-      navigate('/dashboard')
+      // Check if user has any businesses
+      const checkUserBusinesses = async () => {
+        const { data: businessUsers, error } = await supabase
+          .from('business_users')
+          .select('business_id')
+          .eq('user_id', user.id)
+
+        if (error) {
+          console.error('Error checking user businesses:', error)
+          return
+        }
+
+        if (businessUsers && businessUsers.length > 0) {
+          navigate('/auth/business-selection')
+        } else {
+          navigate('/dashboard')
+        }
+      }
+
+      checkUserBusinesses()
     }
   }, [user, navigate])
 
@@ -27,8 +45,23 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
+
+      if (error) throw error
+
+      // Get user profile data
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', data.user.id)
+        .single()
+
+      if (userError) throw userError
+
       await signIn(email, password)
-      // Não precisamos navegar aqui, o useEffect vai cuidar disso quando o user for atualizado
     } catch (error) {
       console.error('Login error:', error)
       toast.error('Failed to sign in. Please check your credentials.')
